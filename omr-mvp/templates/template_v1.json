@@ -1,0 +1,19 @@
+{
+  "version": "v1",
+  "bubble_centers": [
+    {"question": 1, "option": "A", "x": 100, "y": 200},
+    {"question": 1, "option": "B", "x": 150, "y": 200},
+    {"question": 1, "option": "C", "x": 200, "y": 200},
+    {"question": 1, "option": "D", "x": 250, "y": 200},
+    {"question": 2, "option": "A", "x": 100, "y": 250},
+    {"question": 2, "option": "B", "x": 150, "y": 250},
+    {"question": 2, "option": "C", "x": 200, "y": 250},
+    {"question": 2, "option": "D", "x": 250, "y": 250}
+  ],
+  "layout_mapping": {
+    "questions_per_row": 1,
+    "options_per_question": 4,
+    "bubble_radius": 10,
+    "grid_spacing": {"x": 50, "y": 50}
+  }
+}
