@@ -1,0 +1,22 @@
+# OMR Image Processing Engine Requirements
+
+# Core image processing libraries
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Image manipulation
+Pillow>=10.0.0
+scikit-image>=0.21.0
+
+# Data handling
+pandas>=2.0.0
+openpyxl>=3.1.0  # For Excel file handling
+
+# Utilities
+matplotlib>=3.7.0  # For visualization and debugging
+imutils>=0.5.4     # OpenCV convenience functions
+
+# Development dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
