@@ -1,19 +1,24 @@
 {
-  "version": "v1",
-  "bubble_centers": [
-    {"question": 1, "option": "A", "x": 100, "y": 200},
-    {"question": 1, "option": "B", "x": 150, "y": 200},
-    {"question": 1, "option": "C", "x": 200, "y": 200},
-    {"question": 1, "option": "D", "x": 250, "y": 200},
-    {"question": 2, "option": "A", "x": 100, "y": 250},
-    {"question": 2, "option": "B", "x": 150, "y": 250},
-    {"question": 2, "option": "C", "x": 200, "y": 250},
-    {"question": 2, "option": "D", "x": 250, "y": 250}
-  ],
-  "layout_mapping": {
-    "questions_per_row": 1,
+  "template_name": "template_v1",
+  "num_questions": 100,
+  "subjects": {
+    "PYTHON": { "start": 1, "end": 20 },
+    "DATA ANALYSIS": { "start": 21, "end": 40 },
+    "MySQL": { "start": 41, "end": 60 },
+    "POWER BI": { "start": 61, "end": 80 },
+    "Adv STATS": { "start": 81, "end": 100 }
+  },
+  "options": ["A", "B", "C", "D"],
+  "bubble_grid": {
+    "rows": 20,
+    "cols": 5,
+    "questions_per_column": 20,
     "options_per_question": 4,
-    "bubble_radius": 10,
-    "grid_spacing": {"x": 50, "y": 50}
+    "start_x": 120,
+    "start_y": 380,
+    "column_x_spacing": 200,
+    "question_y_spacing": 32,
+    "option_x_spacing": 35,
+    "grid_layout": "5_columns_x_20_rows"
   }
 }

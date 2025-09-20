@@ -1,0 +1,48 @@
+{
+  "num_questions": 100,
+  "subjects": {
+    "PYTHON": [1, 20],
+    "DATA ANALYSIS": [21, 40],
+    "MySQL": [41, 60],
+    "POWER BI": [61, 80],
+    "Adv STATS": [81, 100]
+  },
+  "bubble_grid": {
+    "layout": "visual_calibrated",
+    "image_analysis": "Based on actual bubble positions in user's OMR sheet",
+    "columns": [
+      {
+        "name": "PYTHON",
+        "questions": [1, 20],
+        "start_x": 0.085,
+        "option_spacing": 0.025
+      },
+      {
+        "name": "DATA ANALYSIS", 
+        "questions": [21, 40],
+        "start_x": 0.235,
+        "option_spacing": 0.025
+      },
+      {
+        "name": "MySQL",
+        "questions": [41, 60],
+        "start_x": 0.385,
+        "option_spacing": 0.025
+      },
+      {
+        "name": "POWER BI",
+        "questions": [61, 80], 
+        "start_x": 0.535,
+        "option_spacing": 0.025
+      },
+      {
+        "name": "Adv STATS",
+        "questions": [81, 100],
+        "start_x": 0.685,
+        "option_spacing": 0.025
+      }
+    ],
+    "start_y": 0.20,
+    "row_spacing": 0.028
+  }
+}

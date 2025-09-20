@@ -1,0 +1,80 @@
+{
+  "num_questions": 100,
+  "subjects": {
+    "PYTHON": [
+      1,
+      20
+    ],
+    "DATA ANALYSIS": [
+      21,
+      40
+    ],
+    "MySQL": [
+      41,
+      60
+    ],
+    "POWER BI": [
+      61,
+      80
+    ],
+    "Adv STATS": [
+      81,
+      100
+    ]
+  },
+  "bubble_grid": {
+    "layout": "ultra_precise",
+    "description": "Ultra-precise coordinates based on detailed image analysis",
+    "image_width": 2480,
+    "image_height": 3508,
+    "columns": [
+      {
+        "name": "PYTHON",
+        "questions": [
+          1,
+          20
+        ],
+        "start_x": 0.074,
+        "option_spacing": 0.0315
+      },
+      {
+        "name": "DATA ANALYSIS",
+        "questions": [
+          21,
+          40
+        ],
+        "start_x": 0.266,
+        "option_spacing": 0.0315
+      },
+      {
+        "name": "MySQL",
+        "questions": [
+          41,
+          60
+        ],
+        "start_x": 0.458,
+        "option_spacing": 0.0315
+      },
+      {
+        "name": "POWER BI",
+        "questions": [
+          61,
+          80
+        ],
+        "start_x": 0.65,
+        "option_spacing": 0.0315
+      },
+      {
+        "name": "Adv STATS",
+        "questions": [
+          81,
+          100
+        ],
+        "start_x": 0.842,
+        "option_spacing": 0.0315
+      }
+    ],
+    "start_y": 0.268,
+    "row_spacing": 0.0308
+  }
+}

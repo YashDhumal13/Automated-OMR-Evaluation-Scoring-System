@@ -1,101 +1,71 @@
-"""
-OMR MVP Application - Main entry point
-"""
-import tkinter as tk
-from tkinter import filedialog, messagebox
-import sqlite3
-import json
-from omr_pipeline import OMRPipeline
-from template_maker import TemplateMaker
+# app.py
+import streamlit as st, os, json, time, sqlite3, pandas as pd
+from omr_pipeline import process_image
+from pathlib import Path
+import tempfile
+from PIL import Image
 
-class OMRApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("OMR MVP - Bubble Sheet Reader")
-        self.setup_ui()
-        self.init_database()
-    
-    def setup_ui(self):
-        """Setup the user interface"""
-        # Create main frame
-        main_frame = tk.Frame(self.root)
-        main_frame.pack(padx=10, pady=10)
-        
-        # Template selection
-        tk.Label(main_frame, text="Template:").pack()
-        self.template_var = tk.StringVar()
-        tk.Entry(main_frame, textvariable=self.template_var, width=50).pack()
-        tk.Button(main_frame, text="Browse Template", command=self.browse_template).pack()
-        
-        # Image processing
-        tk.Button(main_frame, text="Process Images", command=self.process_images).pack(pady=10)
-        
-        # Results display
-        self.results_text = tk.Text(main_frame, height=10, width=60)
-        self.results_text.pack()
-    
-    def init_database(self):
-        """Initialize SQLite database for results"""
-        conn = sqlite3.connect('results.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS results (
-                id INTEGER PRIMARY KEY,
-                image_path TEXT,
-                answers TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        conn.commit()
-        conn.close()
-    
-    def browse_template(self):
-        """Browse for template file"""
-        filename = filedialog.askopenfilename(
-            title="Select Template",
-            filetypes=[("JSON files", "*.json")]
-        )
-        if filename:
-            self.template_var.set(filename)
-    
-    def process_images(self):
-        """Process selected images"""
-        template_path = self.template_var.get()
-        if not template_path:
-            messagebox.showerror("Error", "Please select a template file")
-            return
-        
-        image_paths = filedialog.askopenfilenames(
-            title="Select Images to Process",
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")]
-        )
-        
-        if image_paths:
-            pipeline = OMRPipeline(template_path)
-            results = pipeline.process_batch(image_paths)
-            self.display_results(results)
-            self.save_results(results)
-    
-    def display_results(self, results):
-        """Display processing results"""
-        self.results_text.delete(1.0, tk.END)
-        for result in results:
-            self.results_text.insert(tk.END, f"File: {result['image_path']}\n")
-            self.results_text.insert(tk.END, f"Answers: {result['answers']}\n\n")
-    
-    def save_results(self, results):
-        """Save results to database"""
-        conn = sqlite3.connect('results.db')
-        cursor = conn.cursor()
-        for result in results:
-            cursor.execute(
-                "INSERT INTO results (image_path, answers) VALUES (?, ?)",
-                (result['image_path'], json.dumps(result['answers']))
-            )
-        conn.commit()
-        conn.close()
+# Get the directory where this script is located
+SCRIPT_DIR = Path(__file__).parent.absolute()
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = OMRApp(root)
-    root.mainloop()
+st.set_page_config(layout="wide", page_title="OMR Auto-Eval — MVP")
+st.title("Automated OMR Evaluation & Scoring — MVP")
+
+st.sidebar.header("Config")
+template_path = st.sidebar.text_input("Template JSON", str(SCRIPT_DIR / "templates" / "template_ultra_precise.json"))
+answer_key_path = st.sidebar.text_input("Answer key JSON", str(SCRIPT_DIR / "answer_keys" / "answer_key_precise.json"))
+fill_thresh = st.sidebar.slider("Fill threshold", 0.05, 0.6, 0.15, 0.01)  # Ultra-precise default
+option_radius = st.sidebar.slider("Option radius (norm)", 0.005, 0.05, 0.015, 0.001)  # Ultra-precise default
+
+uploaded = st.file_uploader("Upload OMR image(s)", type=["jpg","jpeg","png"], accept_multiple_files=True)
+if st.button("Process") and uploaded:
+    results_dir = SCRIPT_DIR / "results_out"
+    os.makedirs(results_dir, exist_ok=True)
+    conn = sqlite3.connect(str(SCRIPT_DIR / "results.db"))
+    c = conn.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, filename TEXT, version TEXT, total INTEGER, result_json TEXT, ts REAL)""")
+    for file in uploaded:
+        fn = file.name
+        tmp = os.path.join(tempfile.gettempdir(), fn)
+        with open(tmp, "wb") as f:
+            f.write(file.getbuffer())
+        st.info("Processing " + fn)
+        try:
+            res = process_image(tmp, template_path, answer_key_path, fill_thresh=fill_thresh, option_radius=option_radius)
+            st.image(res["overlay_path"], caption=f"Overlay: {fn}")
+            st.write("Total score:", res["total"])
+            for s in res["subject_scores"]:
+                st.write(s["name"], ":", s["score"])
+            # save in DB
+            c.execute("INSERT INTO results (filename, version, total, result_json, ts) VALUES (?,?,?,?,?)",
+                      (fn, Path(template_path).stem, res["total"], json.dumps(res), time.time()))
+            conn.commit()
+            st.success("Saved result for " + fn)
+        except Exception as e:
+            st.error("Error processing " + fn + " : " + str(e))
+    conn.close()
+    st.success("Batch done.")
+
+if st.button("Export CSV"):
+    try:
+        conn = sqlite3.connect(str(SCRIPT_DIR / "results.db"))
+        # Check if table exists
+        c = conn.cursor()
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='results'")
+        if c.fetchone():
+            df = pd.read_sql_query("SELECT id, filename, version, total, ts FROM results", conn)
+            if not df.empty:
+                ts = int(time.time())
+                out_csv = str(SCRIPT_DIR / f"results_{ts}.csv")
+                df.to_csv(out_csv, index=False)
+                conn.close()
+                with open(out_csv, "rb") as f:
+                    st.download_button("Download CSV", f, file_name=out_csv)
+                st.success(f"CSV exported: {out_csv}")
+            else:
+                st.warning("No results to export yet. Process some OMR images first.")
+        else:
+            st.warning("No results to export yet. Process some OMR images first.")
+        conn.close()
+    except Exception as e:
+        st.error(f"Error exporting CSV: {str(e)}")
